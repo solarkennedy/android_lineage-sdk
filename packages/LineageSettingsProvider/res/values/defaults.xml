@@ -20,6 +20,9 @@
     <!-- Default for LineageSettings.Secure.QS_SHOW_BRIGHTNESS_SLIDER -->
     <bool name="def_qs_show_brightness_slider">true</bool>
 
+    <!-- Default for LineageSettings.Secure.QS_SHOW_VOLUME_SLIDER -->
+    <bool name="def_qs_show_volume_slider">false</bool>
+
     <!-- Defaults for System -->
 
     <!-- Default for LineageSettings.System.FORCE_SHOW_NAVBAR -->

@@ -37,7 +37,7 @@ public class LineageDatabaseHelper extends SQLiteOpenHelper{
     private static final boolean LOCAL_LOGV = false;
 
     private static final String DATABASE_NAME = "lineagesettings.db";
-    private static final int DATABASE_VERSION = 24;
+    private static final int DATABASE_VERSION = 25;
 
     public static class LineageTableNames {
         public static final String TABLE_SYSTEM = "system";
@@ -353,6 +353,21 @@ public class LineageDatabaseHelper extends SQLiteOpenHelper{
             upgradeVersion = 24;
         }
 
+        if (upgradeVersion < 25) {
+            // Set default value for LineageSettings.Secure.QS_SHOW_VOLUME_SLIDER
+            // in databases created before the setting existed
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, LineageSettings.Secure.QS_SHOW_VOLUME_SLIDER,
+                        R.bool.def_qs_show_volume_slider);
+            } finally {
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 25;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
         if (upgradeVersion != newVersion) {
             Log.wtf(TAG, "warning: upgrading settings database to version "
@@ -444,6 +459,9 @@ public class LineageDatabaseHelper extends SQLiteOpenHelper{
 
             loadBooleanSetting(stmt, LineageSettings.Secure.QS_SHOW_BRIGHTNESS_SLIDER,
                     R.bool.def_qs_show_brightness_slider);
+
+            loadBooleanSetting(stmt, LineageSettings.Secure.QS_SHOW_VOLUME_SLIDER,
+                    R.bool.def_qs_show_volume_slider);
         } finally {
             if (stmt != null) stmt.close();
         }
