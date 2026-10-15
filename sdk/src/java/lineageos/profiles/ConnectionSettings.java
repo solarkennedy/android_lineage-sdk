@@ -7,6 +7,7 @@
 package lineageos.profiles;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -235,7 +236,11 @@ public final class ConnectionSettings implements Parcelable {
 
     /** @hide */
     public void processOverride(Context context) {
-        BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();
+        // Bluetooth rejects enable()/disable() from system_server ("android") unless
+        // the caller carries an attribution tag, and profile triggers run there.
+        BluetoothManager btm = context.createAttributionContext("lineage_profiles")
+                .getSystemService(BluetoothManager.class);
+        BluetoothAdapter bta = btm != null ? btm.getAdapter() : null;
         LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -271,6 +276,9 @@ public final class ConnectionSettings implements Parcelable {
                 context.sendBroadcast(intent, "com.android.phone.CHANGE_NETWORK_MODE");
                 break;
             case PROFILE_CONNECTION_BLUETOOTH:
+                if (bta == null) {
+                    break;
+                }
                 int btstate = bta.getState();
                 if (forcedState && (btstate == BluetoothAdapter.STATE_OFF
                         || btstate == BluetoothAdapter.STATE_TURNING_OFF)) {
